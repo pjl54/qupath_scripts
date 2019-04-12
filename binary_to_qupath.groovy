@@ -20,28 +20,34 @@ import ij.measure.Calibration
 import ij.plugin.filter.ThresholdToSelection
 import ij.process.ByteProcessor
 import ij.process.ImageProcessor
+
 import qupath.imagej.objects.ROIConverterIJ
 import qupath.lib.objects.PathAnnotationObject
 import qupath.lib.objects.classes.PathClassFactory
-import qupath.lib.scripting.QPEx
 
 import qupath.lib.roi.*
 import qupath.lib.objects.*
 
+import java.awt.Graphics2D
 import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
 
 // Get the main QuPath data structures
 def server = getCurrentImageData().getServer()
-def imageData = QPEx.getCurrentImageData()
+def imageData = getCurrentImageData()
 def hierarchy = imageData.getHierarchy()
 
 String name = server.getShortServerName()
 
 // Create annotations for all the files
 def annotations = []
-def pathOutput = 'D:/lumenTrainMasks_uint8/' + name + '_mask.png' // for windows
-String result = pathOutput.replaceAll( "/","\\\\");
-def fileMask = new File(result)
+String imgPath = server.getPath()
+
+// If your file has a 5 character image extension, watch out
+String result = imgPath[6..server.getPath().length()-5] + '_mask.png'
+
+File fileMask = new File(result)
+
 print(fileMask)
 print(result)
 annotations << parseAnnotation(fileMask)
@@ -81,7 +87,14 @@ areaAnnotations.each { selected ->
  */
 def parseAnnotation(File file) {
     // Read the image
-    def img = ImageIO.read(file)
+        print(file)
+        BufferedImage src = ImageIO.read(file)
+    BufferedImage img= new BufferedImage(src.getWidth(), src.getHeight(), 10);
+    Graphics2D g2d= img.createGraphics();
+    g2d.drawImage(src, 0, 0, null);
+    g2d.dispose();    
+
+
     
     // To create the ROI, travel into ImageJ
     def bp = new ByteProcessor(img)
