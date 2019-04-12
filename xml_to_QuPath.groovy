@@ -18,11 +18,15 @@ import qupath.lib.objects.*
 import qupath.lib.roi.*
 
 
-String xmlDirectory = 'D:/ccipd_data/UH Bladder Cancer Project/Blad 170830'
+String xmlDirectory = 'F:/Gupta_Zeiss'
 def server = getCurrentImageData().getServer()
-String path = xmlDirectory + '/' + server.getShortServerName() + '.xml'
-String result = path.replaceAll( "/","\\\\");
-print(path)
+
+String imgPath = server.getPath()
+
+// If your file has a 5 character image extension, watch out
+String path = imgPath[6..server.getPath().length()-5] + '.xml'
+//String path = xmlDirectory + '/' + server.getShortServerName() + '.xml'
+//String result = path.replaceAll( "/","\\\\");
 File xmlFile = new File(path)
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
