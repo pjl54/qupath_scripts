@@ -10,7 +10,8 @@ def shapes = getAnnotationObjects().collect({getShape(it.getROI())})
 double downsample = 1.0
 
 // define output directory
-def pathOutput = 'D:/lumenTrainMasks/' // for windows
+// Use \\ instead of \ in Windows filepaths
+def pathOutput = 'D:\\qupathFixes\\ef'
 
 def server = getCurrentImageData().getServer()
 int w = (server.getWidth() / downsample) as int

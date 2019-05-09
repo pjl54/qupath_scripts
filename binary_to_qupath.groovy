@@ -1,18 +1,5 @@
 /**
  * Script to import binary masks & create annotations, adding them to the current object hierarchy.
- *
- * It is assumed that each mask is stored in a PNG file in a project subdirectory called 'masks'.
- * Each file name should be of the form:
- *   [Short original image name]_[Classification name]_([downsample],[x],[y],[width],[height])-mask.png
- *
- * Note: It's assumed that the classification is a simple name without underscores, i.e. not a 'derived' classification
- * (so 'Tumor' is ok, but 'Tumor: Positive' is not)
- *
- * The x, y, width & height values should be in terms of coordinates for the full-resolution image.
- *
- * By default, the image name stored in the mask filename has to match that of the current image - but this check can be turned off.
- *
- * @author Pete Bankhead
  */
 
 
@@ -32,24 +19,42 @@ import java.awt.Graphics2D
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 
+// Only need to change these if your mask files aren't in the image directory or aren't name <imageName>_mask.png
+// Need to use \\ instead of \ in Windows filepaths
+String customMaskDir = 'D:\\qupathFixes\\ef'
+String customSuffix = '_masker.png'
+
 // Get the main QuPath data structures
 def server = getCurrentImageData().getServer()
 def imageData = getCurrentImageData()
 def hierarchy = imageData.getHierarchy()
 
 String name = server.getShortServerName()
-
 // Create annotations for all the files
 def annotations = []
 String imgPath = server.getPath()
-
 // If your file has a 5 character image extension, watch out
-String result = imgPath[6..server.getPath().length()-5] + '_mask.png'
+String trimmedFilename = imgPath[6..server.getPath().length()-1]
 
-File fileMask = new File(result)
+// Replaces everything after . with customSuffix
+String maskFilename = trimmedFilename.replaceFirst('[\\.].*$',customSuffix)
 
-print(fileMask)
-print(result)
+File fileMask = new File(maskFilename)
+if(!fileMask.exists()) {
+print(maskFilename + ' does not exist')
+	maskFilename = customMaskDir + File.separator + name
+	maskFilename = maskFilename.replaceFirst('[\\.].*$',customSuffix)
+	fileMask = new File(maskFilename)
+}
+
+if(!fileMask.exists()) {
+	print(maskFilename + ' does not exist')
+	return
+	}
+else {
+		print('Loading mask file ' + fileMask)
+	}
+
 annotations << parseAnnotation(fileMask)
 
 // Add annotations to image
@@ -87,7 +92,6 @@ areaAnnotations.each { selected ->
  */
 def parseAnnotation(File file) {
     // Read the image
-        print(file)
         BufferedImage src = ImageIO.read(file)
     BufferedImage img= new BufferedImage(src.getWidth(), src.getHeight(), 10);
     Graphics2D g2d= img.createGraphics();
