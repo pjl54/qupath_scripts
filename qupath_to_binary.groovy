@@ -1,24 +1,29 @@
-import static qupath.lib.roi.PathROIToolsAwt.getShape;
 import java.awt.image.BufferedImage
 import java.awt.Color
 import javax.imageio.ImageIO
 
 // Get java.awt.Shape objects for each annotation
-def shapes = getAnnotationObjects().collect({getShape(it.getROI())})
+def shapes = getAnnotationObjects().collect({it.getROI().getShape()})
 
 // Create a grayscale image
 double downsample = 1.0
 
 // define output directory and suffix
 // Use \\ instead of \ in Windows filepaths
-def pathOutput = 'D:\\qupathFixes'
+def pathOutput = 'D:\\featuredImages'
 String customSuffix = '_mask.png'
 
 def server = getCurrentImageData().getServer()
 int w = (server.getWidth() / downsample) as int
 int h = (server.getHeight() / downsample) as int
-String name = server.getShortServerName()
-String maskFilename = name.replaceFirst('[\\.].*$',customSuffix)
+
+String path2 = server.getPath()
+int ind1 = path2.lastIndexOf("/") + 1;
+int ind2 = path2.lastIndexOf(".") - 1;
+String name = path2[ind1..ind2]
+
+
+String maskFilename = name + customSuffix
 
 print(maskFilename)
 

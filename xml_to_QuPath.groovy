@@ -13,18 +13,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import qupath.lib.roi.PathROIToolsAwt
+//import qupath.lib.roi.PathROIToolsAwt
 import qupath.lib.objects.*
 import qupath.lib.roi.*
+import qupath.lib.regions.*
 
-
-String xmlDirectory = 'F:/Gupta_Zeiss'
+String xmlDirectory = 'D:/ccipd_data/MtSinai'
 def server = getCurrentImageData().getServer()
 
 String imgPath = server.getPath()
 
+print('qupath.lib.images.servers.openslide.OpenslideImageServer: file:/'.length())
 // If your file has a 5 character image extension, watch out
-String path = imgPath[6..server.getPath().length()-5] + '.xml'
+String path = imgPath[64..server.getPath().length()-6] + '.xml'
 //String path = xmlDirectory + '/' + server.getShortServerName() + '.xml'
 //String result = path.replaceAll( "/","\\\\");
 File xmlFile = new File(path)
@@ -56,7 +57,8 @@ coordinatesX[V] = Float.parseFloat(Vertex.item(V).getAttribute('X'))
 coordinatesY[V] = Float.parseFloat(Vertex.item(V).getAttribute('Y'))
 }
 
-def roi = new PolygonROI(coordinatesX,coordinatesY,-1,0,0)
+//def roi = new PolygonROI(coordinatesX,coordinatesY,-1,0,0)
+def roi = new PolygonROI(coordinatesX,coordinatesY,ImagePlane.getDefaultPlane())
 
 def pathObject = new PathAnnotationObject(roi)
 // Add object to hierarchy

@@ -12,10 +12,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import qupath.lib.roi.PathROIToolsAwt
+import qupath.lib.roi.*
+import qupath.lib.images.*
+import qupath.lib.images.servers.ServerTools
 
 // need to use "/" instead of "\" for windows paths, slashes are corrected later in this script
-String saveDirectory = 'C:/Users/pjl54/Documents/CCIPDpjl54/bladderAnnotations' 
+String saveDirectory = 'L:/spreadsheets/benignAnno' 
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
 DocumentBuilder dBuilder
@@ -40,12 +42,15 @@ annotationIdTracker++
 
 print(annoClass)
 if(annoClass == null){
-print('uh')
-annotation.setAttribute('LineColor','65280')
+//annotation.setAttribute('LineColor','65280')
+annotation.setAttribute('LineColor','65535')
+}
+else if(annoClass.getColor() == -256) {
+annotation.setAttribute('LineColor','65535')
 }
 else {
-print('huh')
-annotation.setAttribute('LineColor','62453')
+//annotation.setAttribute('LineColor','62453')
+annotation.setAttribute('LineColor','65535')
 }
 rootElement.appendChild(annotation)
 
@@ -66,7 +71,8 @@ region.appendChild(Vertices)
 // Get the QuPath ROI (rectangle, polygon, area, ellipse, line...)
 def roi = drawnAnnotation.getROI()
 // Create a java.awt.Shape from the ROI
-def shape = PathROIToolsAwt.getShape(roi)
+//def shape = PathROIToolsAwt.getShape(roi)
+def shape = roi.getShape()
 // Get an iterator to access the vertices
 def iterator = shape.getPathIterator(null, 0.5)
 
@@ -90,7 +96,13 @@ iterator.next()
 }
 
 def server = getCurrentImageData().getServer()
-String path = saveDirectory + '/' + server.getShortServerName() + '.xml'
+
+String path2 = server.getPath()
+int ind1 = path2.lastIndexOf("/") + 1;
+int ind2 = path2.lastIndexOf(".") - 1;
+name = path2[ind1..ind2]
+
+String path = saveDirectory + '/' + name + '.xml'
 String result = path.replaceAll( "/","\\\\");
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

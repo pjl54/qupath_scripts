@@ -1,14 +1,15 @@
 /**
  * Script to import binary masks & create annotations, adding them to the current object hierarchy.
  */
-
+import qupath.imagej.tools.IJTools
+import qupath.lib.regions.ImagePlane
+import qupath.lib.objects.PathObjects;
 
 import ij.measure.Calibration
 import ij.plugin.filter.ThresholdToSelection
 import ij.process.ByteProcessor
 import ij.process.ImageProcessor
 
-import qupath.imagej.objects.ROIConverterIJ
 import qupath.lib.objects.PathAnnotationObject
 import qupath.lib.objects.classes.PathClassFactory
 
@@ -21,32 +22,37 @@ import java.awt.image.BufferedImage
 
 // Only need to change these if your mask files aren't in the image directory or aren't name <imageName>_mask.png
 // Need to use \\ instead of \ in Windows filepaths
-String customMaskDir = 'D:\\qupathFixes\\ef'
-String customSuffix = '_masker.png'
+String customMaskDir = 'D:\\featuredImages'
+String customSuffix = '_mask.png'
 
 // Get the main QuPath data structures
 def server = getCurrentImageData().getServer()
 def imageData = getCurrentImageData()
 def hierarchy = imageData.getHierarchy()
 
-String name = server.getShortServerName()
+String path2 = server.getPath()
+int ind1 = path2.lastIndexOf("/") + 1;
+int ind2 = path2.lastIndexOf(".") - 1;
+name = path2[ind1..ind2]
+
 // Create annotations for all the files
 def annotations = []
 String imgPath = server.getPath()
+print(imgPath)
 // If your file has a 5 character image extension, watch out
-String trimmedFilename = imgPath[6..server.getPath().length()-1]
 
 // Replaces everything after . with customSuffix
-String maskFilename = trimmedFilename.replaceFirst('[\\.].*$',customSuffix)
+String maskFilename = name + customSuffix
+print(name)
 
 File fileMask = new File(maskFilename)
 if(!fileMask.exists()) {
 print(maskFilename + ' does not exist')
-	maskFilename = customMaskDir + File.separator + name
-	maskFilename = maskFilename.replaceFirst('[\\.].*$',customSuffix)
+	maskFilename = customMaskDir + File.separator + maskFilename
+	//maskFilename = maskFilename.replaceFirst('[\\.].*$',customSuffix)
 	fileMask = new File(maskFilename)
 }
-
+print(maskFilename)
 if(!fileMask.exists()) {
 	print(maskFilename + ' does not exist')
 	return
@@ -58,17 +64,18 @@ else {
 annotations << parseAnnotation(fileMask)
 
 // Add annotations to image
-hierarchy.addPathObjects(annotations, false)
+addObject(annotations[0])
+//hierarchy.addPathObjects(annotations, false)
 
 //selects all annotation areas.  Change this if you want only a subset of your areas split into contiguous area components.
 def areaAnnotations = getAnnotationObjects().findAll {it.getROI() instanceof AreaROI}
 
 areaAnnotations.each { selected ->
-    def polygons = PathROIToolsAwt.splitAreaToPolygons(selected.getROI())
+    def polygons = RoiTools.splitAreaToPolygons(selected.getROI())
     def newPolygons = polygons[1].collect {
         updated = it
         for (hole in polygons[0])
-            updated = PathROIToolsAwt.combineROIs(updated, hole, PathROIToolsAwt.CombineOp.SUBTRACT)
+            updated = RoiTools.combineROIs(updated, hole, PathROIToolsAwt.CombineOp.SUBTRACT)
     return updated
     }
 
@@ -110,10 +117,17 @@ def parseAnnotation(File file) {
     // Currently, we need to create an ImageJ Calibration object to store the origin
     // (this might be simplified in a later version)
     def cal = new Calibration()
-    cal.xOrigin = 0
-    cal.yOrigin = 0
-    def roi = ROIConverterIJ.convertToPathROI(roiIJ, cal, 1, -1, 0, 0)
-
+    cal.xOrigin = 0.0
+    cal.yOrigin = 0.0
+    
+    int z = 0
+int t = 0
+def plane = ImagePlane.getPlane(z, t)
+    
+    def roi = IJTools.convertToROI(roiIJ, cal, 1.toDouble(), plane)
+    //def roi = convertToPolygonOrAreaROI(roiIJ, 0.toDouble(), 0.toDouble(), 1.toDouble(), -1, 0, 0)
     // Create & return the object
-    return new PathAnnotationObject(roi, null)
+    print(roi)
+    return PathObjects.createAnnotationObject(roi)
+    //return new PathAnnotationObject(roi)
 }
