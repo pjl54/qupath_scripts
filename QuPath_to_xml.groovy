@@ -17,7 +17,7 @@ import qupath.lib.images.*
 import qupath.lib.images.servers.ServerTools
 
 // need to use "/" instead of "\" for windows paths, slashes are corrected later in this script
-String saveDirectory = 'L:/spreadsheets/benignAnno' 
+String saveDirectory = 'D:/test' 
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
 DocumentBuilder dBuilder
@@ -40,17 +40,14 @@ Element annotation = doc.createElement('Annotation')
 annotation.setAttribute('Id',String.valueOf(annotationIdTracker))
 annotationIdTracker++
 
-print(annoClass)
 if(annoClass == null){
-//annotation.setAttribute('LineColor','65280')
-annotation.setAttribute('LineColor','65535')
+annotation.setAttribute('LineColor','65280')
 }
 else if(annoClass.getColor() == -256) {
 annotation.setAttribute('LineColor','65535')
 }
 else {
-//annotation.setAttribute('LineColor','62453')
-annotation.setAttribute('LineColor','65535')
+annotation.setAttribute('LineColor','62453')
 }
 rootElement.appendChild(annotation)
 

@@ -23,12 +23,33 @@ def server = getCurrentImageData().getServer()
 
 String imgPath = server.getPath()
 
-print('qupath.lib.images.servers.openslide.OpenslideImageServer: file:/'.length())
-// If your file has a 5 character image extension, watch out
-String path = imgPath[64..server.getPath().length()-6] + '.xml'
-//String path = xmlDirectory + '/' + server.getShortServerName() + '.xml'
-//String result = path.replaceAll( "/","\\\\");
-File xmlFile = new File(path)
+String path2 = server.getPath()
+int ind1 = path2.lastIndexOf("/") + 1;
+int ind2 = path2.lastIndexOf(".") - 1;
+name = path2[ind1..ind2]
+
+path = path2[path2.indexOf('/')+1..path2.lastIndexOf("/")-1]
+
+
+maskFilename = path + File.separator + name + '.xml'
+
+File fileMask = new File(maskFilename)
+if(!fileMask.exists()) {
+print(maskFilename + ' does not exist')
+	maskFilename = xmlDirectory + File.separator + maskFilename
+	//maskFilename = maskFilename.replaceFirst('[\\.].*$',customSuffix)
+	fileMask = new File(maskFilename)
+}
+if(!fileMask.exists()) {
+	print(maskFilename + ' does not exist')
+	return
+	}
+else {
+		print('Loading mask file ' + fileMask)
+	}
+
+
+File xmlFile = fileMask
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
 DocumentBuilder dBuilder
@@ -41,11 +62,14 @@ doc.getDocumentElement().normalize();
 
 NodeList Annotation = doc.getElementsByTagName('Annotations');
 NodeList Annotations = Annotation.item(0).getElementsByTagName('Annotation');
-NodeList Regions = Annotations.item(0)getElementsByTagName('Regions');
+
+for (A = 0; A < Annotations.getLength(); A++) {
+
+NodeList Regions = Annotations.item(A)getElementsByTagName('Regions');
 NodeList Region = Regions.item(0)getElementsByTagName('Region');
 
 // Loop through the annotations
-print(Region.getLength())
+
 for (R = 0; R < Region.getLength(); R++) {
 NodeList Vertices = Region.item(R).getElementsByTagName('Vertices')
 NodeList Vertex = Vertices.item(0).getElementsByTagName('Vertex')
@@ -64,6 +88,6 @@ def pathObject = new PathAnnotationObject(roi)
 // Add object to hierarchy
 addObject(pathObject)
 }
-
+}
 // lock all annotations
 getAnnotationObjects().each {it.setLocked(true)}
