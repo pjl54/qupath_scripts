@@ -22,7 +22,7 @@ import java.awt.image.BufferedImage
 
 // Only need to change these if your mask files aren't in the image directory or aren't name <imageName>_mask.png
 // Need to use \\ instead of \ in Windows filepaths
-String customMaskDir = 'D:\\featuredImages'
+String customMaskDir = 'D:\\test'
 String customSuffix = '_mask.png'
 
 // Get the main QuPath data structures
@@ -75,7 +75,7 @@ areaAnnotations.each { selected ->
     def newPolygons = polygons[1].collect {
         updated = it
         for (hole in polygons[0])
-            updated = RoiTools.combineROIs(updated, hole, PathROIToolsAwt.CombineOp.SUBTRACT)
+            updated = RoiTools.combineROIs(updated, hole, RoiTools.CombineOp.SUBTRACT)
     return updated
     }
 
