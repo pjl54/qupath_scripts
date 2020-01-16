@@ -18,7 +18,9 @@ import qupath.lib.objects.*
 import qupath.lib.roi.*
 import qupath.lib.regions.*
 
-String xmlDirectory = 'D:/ccipd_data/MtSinai'
+import qupath.lib.objects.classes.*
+
+String xmlDirectory = 'D:/test'
 def server = getCurrentImageData().getServer()
 
 String imgPath = server.getPath()
@@ -48,7 +50,6 @@ else {
 		print('Loading mask file ' + fileMask)
 	}
 
-
 File xmlFile = fileMask
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
@@ -65,8 +66,10 @@ NodeList Annotations = Annotation.item(0).getElementsByTagName('Annotation');
 
 for (A = 0; A < Annotations.getLength(); A++) {
 
-NodeList Regions = Annotations.item(A)getElementsByTagName('Regions');
-NodeList Region = Regions.item(0)getElementsByTagName('Region');
+Integer linecolor = Integer.parseInt(Annotations.item(A).getAttribute('LineColor'));
+print(linecolor)
+NodeList Regions = Annotations.item(A).getElementsByTagName('Regions');
+NodeList Region = Regions.item(0).getElementsByTagName('Region');
 
 // Loop through the annotations
 
@@ -84,7 +87,20 @@ coordinatesY[V] = Float.parseFloat(Vertex.item(V).getAttribute('Y'))
 //def roi = new PolygonROI(coordinatesX,coordinatesY,-1,0,0)
 def roi = new PolygonROI(coordinatesX,coordinatesY,ImagePlane.getDefaultPlane())
 
-def pathObject = new PathAnnotationObject(roi)
+//pathclass = PathClassFactory.getPathClass('ru',linecolor)
+
+// decode linecolor
+
+linecolor = linecolor
+Integer[] gbr = [linecolor>>16,linecolor>>8&255,linecolor&255]
+print(gbr)
+
+pathClasses = getQuPath().getAvailablePathClasses()
+
+pathclass = PathClassFactory.getPathClass(String.valueOf(linecolor),ColorTools.makeRGB(gbr[0],gbr[1],gbr[2]))
+
+
+def pathObject = new PathAnnotationObject(roi, pathclass)
 // Add object to hierarchy
 addObject(pathObject)
 }
