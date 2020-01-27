@@ -17,7 +17,7 @@ import qupath.lib.images.*
 import qupath.lib.images.servers.ServerTools
 
 // need to use "/" instead of "\" for windows paths, slashes are corrected later in this script
-String saveDirectory = 'D:/test'  
+String saveDirectory = 'D:/test' 
 
 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance()
 DocumentBuilder dBuilder
@@ -40,7 +40,13 @@ Element annotation = doc.createElement('Annotation')
 annotation.setAttribute('Id',String.valueOf(annotationIdTracker))
 annotationIdTracker++
 
+if(annoClass != null) {
 linecolor = annoClass.getColor()
+}
+else {
+linecolor = 16711680
+}
+
 int r = (linecolor>>16)&0xFF;
 int g = (linecolor>>8)&0xFF;
 int b = (linecolor>>0)&0xFF;

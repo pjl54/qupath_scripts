@@ -21,6 +21,7 @@ import qupath.lib.regions.*
 import qupath.lib.objects.classes.*
 
 String xmlDirectory = 'D:/test'
+boolean use_xmlDir = false
 def server = getCurrentImageData().getServer()
 
 String imgPath = server.getPath()
@@ -36,9 +37,9 @@ path = path2[path2.indexOf('/')+1..path2.lastIndexOf("/")-1]
 maskFilename = path + File.separator + name + '.xml'
 
 File fileMask = new File(maskFilename)
-if(!fileMask.exists()) {
-print(maskFilename + ' does not exist')
-	maskFilename = xmlDirectory + File.separator + maskFilename
+if(!fileMask.exists() || use_xmlDir) {
+print(maskFilename + ' does not exist or use_xmlDir is set')
+	maskFilename = xmlDirectory + File.separator + File.separator + name + '.xml'
 	//maskFilename = maskFilename.replaceFirst('[\\.].*$',customSuffix)
 	fileMask = new File(maskFilename)
 }
