@@ -68,7 +68,7 @@ NodeList Annotations = Annotation.item(0).getElementsByTagName('Annotation');
 for (A = 0; A < Annotations.getLength(); A++) {
 
 Integer linecolor = Integer.parseInt(Annotations.item(A).getAttribute('LineColor'));
-print(linecolor)
+
 NodeList Regions = Annotations.item(A).getElementsByTagName('Regions');
 NodeList Region = Regions.item(0).getElementsByTagName('Region');
 
@@ -92,13 +92,17 @@ def roi = new PolygonROI(coordinatesX,coordinatesY,ImagePlane.getDefaultPlane())
 
 // decode linecolor
 
-linecolor = linecolor
-Integer[] gbr = [linecolor>>16,linecolor>>8&255,linecolor&255]
-print(gbr)
 
+Integer[] gbr = [linecolor>>16,linecolor>>8&255,linecolor&255]
+
+if(linecolor == 16711680) {
+pathclass = null
+}
+else {
 pathClasses = getQuPath().getAvailablePathClasses()
 
 pathclass = PathClassFactory.getPathClass(String.valueOf(linecolor),ColorTools.makeRGB(gbr[0],gbr[1],gbr[2]))
+}
 
 
 def pathObject = new PathAnnotationObject(roi, pathclass)
