@@ -20,7 +20,7 @@ import qupath.lib.regions.*
 
 import qupath.lib.objects.classes.*
 
-String xmlDirectory = 'D:/test'
+String xmlDirectory = 'F:'
 boolean use_xmlDir = false
 def server = getCurrentImageData().getServer()
 
@@ -68,6 +68,7 @@ NodeList Annotations = Annotation.item(0).getElementsByTagName('Annotation');
 for (A = 0; A < Annotations.getLength(); A++) {
 
 Integer linecolor = Integer.parseInt(Annotations.item(A).getAttribute('LineColor'));
+String name = Annotations.item(A).getAttribute('Name')
 
 NodeList Regions = Annotations.item(A).getElementsByTagName('Regions');
 NodeList Region = Regions.item(0).getElementsByTagName('Region');
@@ -99,11 +100,15 @@ if(linecolor == 16711680) {
 pathclass = null
 }
 else {
-pathClasses = getQuPath().getAvailablePathClasses()
-
+pathclassLocal = PathClassFactory.getPathClass(name)
+//pathClasses = getQuPath().getAvailablePathClasses()
+if(pathclassLocal.getColor() - (255<<24) == linecolor) {
+pathclass = PathClassFactory.getPathClass(name,ColorTools.makeRGB(gbr[0],gbr[1],gbr[2]))
+}
+else {
 pathclass = PathClassFactory.getPathClass(String.valueOf(linecolor),ColorTools.makeRGB(gbr[0],gbr[1],gbr[2]))
 }
-
+}
 
 def pathObject = new PathAnnotationObject(roi, pathclass)
 // Add object to hierarchy
